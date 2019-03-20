@@ -1,20 +1,80 @@
+# Import statements for system libraries
+import json
+import os
+import requests
+import time
+import datetime
+
 # Import statements for Flask
 import flask
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, session
 
+# Import statements for local modules
+#from functions.func import sendDataToAPI
+
+def sendDataToAPI(data, url, route):
+    data = json.dumps(data)
+    headers = {'Authorization' : '', 'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+    try:
+        r = requests.post(url+route, data=data, headers=headers)
+        print("Data from api:\n", r.text)
+        return json.loads(r.text)
+    except:
+        print("Couldn't send to webhook")
+
+# Global values
+url = 'https://hapd-api.herokuapp.com'
 app = Flask(__name__)
-
+app.secret_key = 'mAJORPROJECT19'
 @app.route("/")
 def launch():
-    return render_template('launch.html')
-
-@app.route("/home")
-def dashboard():
-    return render_template('nurse_home.html', result = ['dashboard'])
+    return render_template('launch.html', session = session)
 
 @app.route("/authNurse", methods=['POST'])
 def authNurse():
-    return render_template("header.html")
+    result = request.form
+    nurseId = result["nurseId"]
+    password = result["nursePassword"]
+    data = {
+        "id": nurseId,
+        "password": password
+    }
+    r = sendDataToAPI(data, url, "/authenticateNurse")
+    if(r["fullfilmentText"] == "Access Granted"):
+        session["logged_in"] = nurseId
+        return redirect(url_for("home"))
+    else:
+        return redirect(url_for("launch", session = session))
+
+@app.route("/registerNewPatient", methods=['POST'])
+def registerNewPatient():
+    result = request.form
+    try:
+        datetime.datetime.strptime(result["date"],'%d/%m/%Y')
+    except ValueError:
+        dateError = 1
+        return "Error in date format"
+    print(result["image"], "Hello")  
+    data = {
+        "name": result["name"],
+        "dob": result["date"],
+        "gender": result["gender"],
+        "address": result["address"],
+        "bloodgroup": result["bloodgroup"]
+    }
+    #r = sendDataToAPI(data, url, "/addUser")
+    return "<h1>Patient registered!</h1>"
+
+
+@app.route("/logout")
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for("launch", session = session))
+
+@app.route("/home")
+def home():
+    return render_template('nurse_home.html', result = ['dashboard'])
+
 
 
 

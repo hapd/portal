@@ -10,6 +10,7 @@
 
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    
     <!-- Our Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cust.css') }}">
@@ -54,7 +55,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="/logout">
                         <i class="fas fa-sign-out-alt"></i>
                         Log out
                     </a>
@@ -74,7 +75,7 @@
                     <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <i class="fas fa-align-justify"></i>
                     </button>
-                    
+
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="nav navbar-nav ml-auto">
                             <li class="nav-item">
@@ -90,19 +91,19 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link" href="/logout">
                                   <i class="fas fa-sign-out-alt"></i>
                                   Log out
                                 </a>
                             </li>
-                            
+
                         </ul>
                     </div>
                 </div>
             </nav>
             {% block body %}
             {% endblock %}
-            
+
         </div>
     </div>
 

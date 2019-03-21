@@ -1,0 +1,22 @@
+{% extends 'headers/nurse_header.html' %}
+
+{% block body %}
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+        <h6 class="card-title">Patient registration
+            {% if error[0] == "No error" %}  
+            <strong>Scuccessful</strong>
+            {% else %}
+            <red><strong>Failed</strong></red>
+            {% endif %}
+        </h6>
+        {% if error[0] == "No error" %}
+        <h1>{{ error[1] }}</h1>
+        <small class="form-text text-muted">Patient ID</small>  
+        {% else %} 
+        <h1>Reason</h1>  
+        <small class="form-text text-muted">{{ error[0] }}</small>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

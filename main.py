@@ -49,12 +49,12 @@ def authNurse():
 @app.route("/registerNewPatient", methods=['POST'])
 def registerNewPatient():
     result = request.form
+    error = ["No error"]
     try:
         datetime.datetime.strptime(result["date"],'%d/%m/%Y')
     except ValueError:
-        dateError = 1
-        return "Error in date format"
-    print(result["image"], "Hello")  
+        error = ["Date of Birth Error"]
+        return render_template("registerNewUser.html", error = error)
     data = {
         "name": result["name"],
         "dob": result["date"],
@@ -62,8 +62,14 @@ def registerNewPatient():
         "address": result["address"],
         "bloodgroup": result["bloodgroup"]
     }
-    #r = sendDataToAPI(data, url, "/addUser")
-    return "<h1>Patient registered!</h1>"
+    r = sendDataToAPI(data, url, "/addUser")
+    if(r["fullfilmentText"] == "Account creation successful"):
+        error.append(r["PID"])
+        return render_template("registerNewUser.html", error = error)
+    else:
+        error = ["API error"]
+        return render_template("registerNewUser.html", error = error)
+
 
 
 @app.route("/logout")

@@ -67,14 +67,6 @@
             border-top-left-radius: 0;
             border-top-right-radius: 0;
             }
-            @keyframes spinner {
-            0% {
-                transform: translate3d(-50%, -50%, 0) rotate(0deg);
-            }
-            100% {
-                 transform: translate3d(-50%, -50%, 0) rotate(360deg);
-            }
-          }
         </style>
 </head>
 <body class="text-center" bgcolor="#ffffff">
@@ -89,12 +81,14 @@
                         <br>
                         <br>
                         <button class="btn btn-lg btn-primary btn-block" id = "submitButton"type="submit">Sign in</button> <br>
-                        <div id="spinner"></div>
+                        <span id="spinner"></span>
+
                         <script>
                             document.getElementById("submitButton").onclick = function() {
                                 if(document.querySelector("#nurseId").value != "") {
-                                    if(document.querySelector("#password").value != "")
-                                    document.getElementById("spinner").setAttribute("class", "lds-hourglass");
+                                    if(document.querySelector("#password").value != "") {
+                                    document.getElementById("spinner").setAttribute("class", "spinner spinner-large spinner-blue");
+                                    }
                                 }
                             };
                         </script>
@@ -104,8 +98,7 @@
                 <br><br>
                 <h6>Redirecting you to home screen.</h6>
                 <br><br>
-                <div class="lds-hourglass"></div>
-                <div class="spinner">Loading...</div>
+                <span class="spinner spinner-large spinner-blue"></span>
                 <script>
                   setTimeout(redirect_to_home, 2000)
                   function redirect_to_home(){

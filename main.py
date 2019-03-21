@@ -9,8 +9,8 @@ import datetime
 import flask
 from flask import Flask, render_template, request, redirect, url_for, session
 
-# Import statements for local modules
-#from functions.func import sendDataToAPI
+# Import statements for plotly
+
 
 def sendDataToAPI(data, url, route):
     data = json.dumps(data)
@@ -42,6 +42,16 @@ def authNurse():
     r = sendDataToAPI(data, url, "/authenticateNurse")
     if(r["fullfilmentText"] == "Access Granted"):
         session["logged_in"] = nurseId
+        temp = {
+            "req_type": "read_nurse",
+            "data": {
+                "nurseId": nurseId
+            }
+        }
+        s = sendDataToAPI(temp, url, "/nurse")
+        if(s["fullfilmentText"] == "True"):
+            with open("static/data/logged_in_nurse.json", "w") as f:
+                json.dump(s["data"], f, indent=4)     
         return redirect(url_for("home"))
     else:
         return redirect(url_for("launch", session = session))
@@ -55,21 +65,53 @@ def registerNewPatient():
     except ValueError:
         error = ["Date of Birth Error"]
         return render_template("registerNewUser.html", error = error)
+    with open('static/data/logged_in_nurse.json', 'r') as f:
+        nurse = json.load(f)
     data = {
         "name": result["name"],
         "dob": result["date"],
         "gender": result["gender"],
         "address": result["address"],
-        "bloodgroup": result["bloodgroup"]
+        "bloodgroup": result["bloodgroup"],
+        "nurse": nurse["name"],
+        "contact": nurse["contact"],
+        "nurseId": nurse["nurseId"]
     }
     r = sendDataToAPI(data, url, "/addUser")
     if(r["fullfilmentText"] == "Account creation successful"):
         error.append(r["PID"])
+        data = {
+            "req_type": "increment_nop",
+            "data": {
+                "nurseId": nurse["nurseId"]
+            }
+        }
+        r = sendDataToAPI(data, url, '/nurse')
         return render_template("registerNewUser.html", error = error)
     else:
         error = ["API error"]
         return render_template("registerNewUser.html", error = error)
 
+@app.route('/registerNewNurse')
+def registerNewNurse():
+    return render_template('register_nurse.html', session = session)
+
+@app.route('/registerNurse', methods=['POST'])
+def registerNurse():
+    result = request.form
+    data = {
+        "name": result["name"],
+        "email": result["email"],
+        "contact": result["contact"],
+        "password": result["password"]
+    }
+    d = {
+        "req_type": "add_nurse",
+        "data": data
+    }
+    r = sendDataToAPI(d, url, '/nurse')
+    if(r["fullfilmentText"] == "True"):
+        return render_template("successNewNurse.html", result = [r["nurseId"]])
 
 
 @app.route("/logout")
@@ -79,7 +121,17 @@ def logout():
 
 @app.route("/home")
 def home():
-    return render_template('nurse_home.html', result = ['dashboard'])
+    nurseId = session["logged_in"]
+    temp = {
+            "req_type": "read_nurse",
+            "data": {
+                "nurseId": nurseId
+            }
+    }
+    s = sendDataToAPI(temp, url, "/nurse")
+    if(s["fullfilmentText"] == "True"):
+        result = s["data"]
+    return render_template('nurse_home.html', result = result)
 
 
 

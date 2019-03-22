@@ -10,16 +10,113 @@
     }
 </script>
 {% else %}
-<div class="card" style="width: 18rem;">
-    <div class="card-body">
-      <h6 class="card-title">Total number of <strong>Patients</strong></h6>
-      <h1>{{ result["nop"] }}</h1>
-      <br>&nbsp;&nbsp;&nbsp;&nbsp;
-      <button type="button" class="btn btn-outline-primary mx-auto" data-toggle="modal" data-target="#signUpFormPatient">
-          Register new patient
-      </button>
+  <div class="row">
+    <div class="col-sm-2">
+      <div class="card" style="width: auto; height: auto;">
+          <div class="card-body">
+            <h6 class="card-title">Total number of <strong>Patients</strong></h6>
+            <h1>{{ result[0]["nop"] }}</h1>
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-primary mx-auto" data-toggle="modal" data-target="#signUpFormPatient">
+                Register new patient
+            </button>
+          </div>
+      </div>
+    </div>&nbsp;
+    <div class="col-sm-4">
+      <div class="card" style="width: 30rem; height: auto; padding-bottom: 20px;">
+        <div class="card-body">
+          <canvas id="stageDoughnutChart"></canvas>
+        </div>
+      </div>
     </div>
-</div>
+    <script>
+        // Stage Chart
+        let doughnutChart = document.getElementById('stageDoughnutChart')
+        let data = {
+          datasets: [{
+              data: [10, 20, 30],
+              backgroundColor: [
+                '#99c5e2',
+                '#6194cb',
+                '#227096'
+              ],
+              hoverBorderWidth: 3,
+              hoverBorderColor: "#777"
+          }],
+          // These labels appear in the legend and in the tooltips when hovering different arcs
+          labels: [
+              'Stage 1',
+              'Stage 2',
+              'Stage 3'
+          ]
+        };
+        let myPieChart = new Chart(doughnutChart, {
+          type: 'doughnut',
+          data: data,
+          options: {
+            title: {
+              display: true,
+              text: 'Distribution of Patients by Stage',
+              fontSize: 20
+            },
+            legend: {
+              position: 'right'
+            }
+          }
+        });
+        </script>
+    <div class="col-sm-5">
+        <div class="card" style="width: 30rem; height: auto;">
+          <div class="card-body">
+            <canvas width="28rem" height="20rem" id="ageBarChart"></canvas>
+          </div>
+        </div>
+    </div>
+    <script>
+
+        // Bar Chart
+        let barChart = document.getElementById('ageBarChart')
+        let data2 = {
+          datasets: [{
+              data: [50, 100, 30, 35],
+              backgroundColor: [
+                '#99c5e2',
+                '#6194cb',
+                '#227096',
+                '#12a8e1'
+              ],
+              hoverBorderWidth: 3,
+              hoverBorderColor: "#777"
+          }],
+          labels: [
+              'Ages 30-40',
+              'Ages 40-50',
+              'Ages 50-60',
+              'Ages 60-70'
+          ]
+        };
+        let myBarChart = new Chart(barChart, {
+          type: 'horizontalBar',
+          data: data2,
+          options: {
+            title: {
+              display: true,
+              text: 'Distribution of Patients by Age',
+              fontSize: 20
+            },
+            legend: {
+              position: 'right'
+            }
+          }
+      });
+      </script>
+      
+  </div>
+
+
+<br>
+
 
 <br>
 
@@ -36,7 +133,7 @@
           </button>
         </div>
         <div class="modal-body">
-            <form action="/registerNewPatient" name="registerNewPatient" method="POST">
+            <form action="/registerNewPatient" name="registerNewPatient" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <div class="input-group mb-3">
                             <div class="input-group-prepend">
@@ -91,6 +188,13 @@
                         </div>
                         <input type="text" class="form-control" name="date" placeholder="Date of Birth (dd/mm/yyyy)" required> 
                     </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="basic-addon1"><i class="fas fa-key"></i></span>
+                        </div>
+                        <input type="password" class="form-control" name="password" placeholder="PIN/PASSWORD" required> 
+                    </div>
                     
                     
 
@@ -99,8 +203,8 @@
                     </div>
 
                     <div class="input-group mb3">
-                      <label for="image">Upload Image</label>
-                      <input type="file" class="form-control-file" id="image" name="image" placeholder="Image" required>
+                      <label for="image">Upload Image</label> &nbsp;&nbsp;&nbsp;
+                      <input type="file" name="file" required>
                     </div>
                 </div>
               </div>

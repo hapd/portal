@@ -1,17 +1,32 @@
+'''
+Major project CSE-D (203, 221, 246, 249)
+'''
 # Import statements for system libraries
 import json
 import os
 import requests
 import time
 import datetime
+import base64
 
 # Import statements for Flask
 import flask
 from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.utils import secure_filename
 
-# Import statements for plotly
+# Import statements for data-analytics and opencv
+import cv2
+import numpy as np
 
+# Global values
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
+url = 'https://hapd-api.herokuapp.com'
+app = Flask(__name__)
+app.secret_key = 'mAJORPROJECT19'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Redundant functions
 def sendDataToAPI(data, url, route):
     data = json.dumps(data)
     headers = {'Authorization' : '', 'Accept' : 'application/json', 'Content-Type' : 'application/json'}
@@ -22,10 +37,9 @@ def sendDataToAPI(data, url, route):
     except:
         print("Couldn't send to webhook")
 
-# Global values
-url = 'https://hapd-api.herokuapp.com'
-app = Flask(__name__)
-app.secret_key = 'mAJORPROJECT19'
+def allowed_file(filename):
+    return ('.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS)
+
 @app.route("/")
 def launch():
     return render_template('launch.html', session = session)
@@ -59,6 +73,20 @@ def authNurse():
 @app.route("/registerNewPatient", methods=['POST'])
 def registerNewPatient():
     result = request.form
+    print(request.files)
+    if('file' not in request.files):
+        error = ["Bad Image error"]
+        return render_template("registerNewUser.html", error = error)
+    else:
+        file = request.files['file']
+        if(file and allowed_file(file.filename)):
+            f = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], f))
+    image = cv2.imread("static/images/"+f)
+    retval, buffer = cv2.imencode('.jpg', image)
+    encoded = base64.b64encode(buffer)
+    encoded_string_image = str(encoded)[2:-1]
+    result = request.form
     error = ["No error"]
     try:
         datetime.datetime.strptime(result["date"],'%d/%m/%Y')
@@ -75,7 +103,9 @@ def registerNewPatient():
         "bloodgroup": result["bloodgroup"],
         "nurse": nurse["name"],
         "contact": nurse["contact"],
-        "nurseId": nurse["nurseId"]
+        "nurseId": nurse["nurseId"],
+        "pin": result["password"],
+        "image": encoded_string_image
     }
     r = sendDataToAPI(data, url, "/addUser")
     if(r["fullfilmentText"] == "Account creation successful"):
@@ -116,7 +146,7 @@ def registerNurse():
 
 @app.route("/logout")
 def logout():
-    session.pop('logged_in', None)
+    session.clear()
     return redirect(url_for("launch", session = session))
 
 @app.route("/home")
@@ -131,7 +161,7 @@ def home():
     s = sendDataToAPI(temp, url, "/nurse")
     if(s["fullfilmentText"] == "True"):
         result = s["data"]
-    return render_template('nurse_home.html', result = result)
+    return render_template('nurse_home.html', result = [result])
 
 
 

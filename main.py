@@ -99,6 +99,7 @@ def registerNewPatient():
         "name": result["name"],
         "dob": result["date"],
         "gender": result["gender"],
+        "stage": result["stage"],
         "address": result["address"],
         "bloodgroup": result["bloodgroup"],
         "nurse": nurse["name"],
@@ -107,6 +108,17 @@ def registerNewPatient():
         "pin": result["password"],
         "image": encoded_string_image
     }
+    data_forStage = {
+        "req_type": "increment_nos",
+        "data": {
+            "nurseId": nurse["nurseId"],
+            "stage": result["stage"]
+        }
+    }
+    q = sendDataToAPI(data_forStage, url, "/nurse")
+    if(q["fullfilmentText"] == "False"):
+        error = ["Could not connect to the API"]
+        return render_template("registerNewUser.html", error = error)
     r = sendDataToAPI(data, url, "/addUser")
     if(r["fullfilmentText"] == "Account creation successful"):
         error.append(r["PID"])
@@ -161,7 +173,7 @@ def home():
     s = sendDataToAPI(temp, url, "/nurse")
     if(s["fullfilmentText"] == "True"):
         result = s["data"]
-    return render_template('nurse_home.html', result = [result])
+    return render_template('nurse_home.html', result = result, session = session)
 
 
 

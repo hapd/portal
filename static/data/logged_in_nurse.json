@@ -1,7 +1,12 @@
 {
     "nurseId": "5",
     "name": "Mary",
-    "nop": "0",
+    "nop": "1",
     "email": "mary@gmail.com",
-    "contact": "9898768956"
+    "contact": "9898768956",
+    "nos1": "1",
+    "nos2": "1",
+    "nos3": "0",
+    "nos4": "0",
+    "nos5": "0"
 }

@@ -72,7 +72,6 @@
         <div class="card" style="width: 30rem; height: auto;">
           <div class="card-body">
             <canvas width="28rem" height="20rem" id="ageBarChart"></canvas>
-            <small>Sample Chart (Not Dynamic)</small>
           </div>
         </div>
     </div>
@@ -82,7 +81,7 @@
         let barChart = document.getElementById('ageBarChart')
         let data2 = {
           datasets: [{
-              data: [50, 100, 30, 35],
+              data: [1, 2, 1, 1],
               backgroundColor: [
                 '#99c5e2',
                 '#6194cb',
@@ -109,8 +108,16 @@
               fontSize: 20
             },
             legend: {
+              display: false,
               position: 'right'
-            }
+            },
+            scales: {
+            xAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
           }
       });
       </script>

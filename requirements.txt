@@ -1,2 +1,5 @@
 Flask==0.12.2
 Requests==2.18.4
+opencv-python
+numpy
+

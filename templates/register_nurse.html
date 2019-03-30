@@ -74,7 +74,7 @@
         <div class="card-body">
                 {% if "logged_in" not in session %}
                 <h1 class="card-title">Register</h1>
-                    <form class="form-signin" action="/registerNurse" method="POST">
+                    <form class="form-signin" action="/registerNurse" method="POST" enctype="multipart/form-data">
                         <input type="text" id="name" name="name" class="form-control" placeholder="Name" required autofocus>
                         <br>
                         <input type="email" id="email" name="email" class="form-control" placeholder="Email" required autofocus>
@@ -82,6 +82,9 @@
                         <input type="text" id="contact" name="contact" class="form-control" placeholder="Contact" required autofocus>
                         <br>
                         <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                        <br>
+                        <label for="image">Upload Image</label> &nbsp;&nbsp;&nbsp;
+                        <input type="file" name="file" required>
                         <br>
                         <button class="btn btn-lg btn-primary btn-block" id = "submitButton"type="submit">Register</button> <br>
                         <span id="spinner"></span>

@@ -11,31 +11,32 @@
 </script>
 {% else %}
   <div class="row">
-    <div class="col-sm-2">
+    <div class="col-md-2">
       <div class="card" style="width: auto; height: auto;">
           <div class="card-body">
             <h6 class="card-title">Total number of <strong>Patients</strong></h6>
-            <h1>{{ result["nop"] }}</h1>
+            <h1>{{ result[0]['nop'] }}</h1>
             <br>&nbsp;&nbsp;&nbsp;&nbsp;
             <button type="button" class="btn btn-outline-primary mx-auto" data-toggle="modal" data-target="#signUpFormPatient">
-                Register new patient
+                New 
             </button>
           </div>
       </div>
     </div>&nbsp;
-    <div class="col-sm-4">
-      <div class="card" style="width: 30rem; height: auto; padding-bottom: 20px;">
-        <div class="card-body">
+    <div class="col-md-4">
+      <div class="card" style="width: auto; height: auto; padding-bottom: 20px;">
+        <div class="card-body" id="doughnutChartBody">
           <canvas id="stageDoughnutChart"></canvas>
         </div>
       </div>
     </div>
     <script>
         // Stage Chart
+        {% if result['nop'] != 0 %}
         let doughnutChart = document.getElementById('stageDoughnutChart')
         let data = {
           datasets: [{
-              data: [ {{ result["nos1"] }}, {{ result["nos2"] }}, {{ result["nos3"] }},  {{ result["nos4"] }},  {{ result["nos5"] }} ],
+              data: [ {{ result[0]["nos1"] }}, {{ result[0]["nos2"] }}, {{ result[0]["nos3"] }},  {{ result[0]["nos4"] }},  {{ result[0]["nos5"] }} ],
               backgroundColor: [
                 '#99c5e2',
                 '#6194cb',
@@ -67,35 +68,42 @@
             }
           }
         });
+        {% else %}
+        document.getElementById('doughnutChartBody').innerHTML = "<h5>Add patients to access this chart.</h5>"
+        {% endif %}
         </script>
-    <div class="col-sm-5">
-        <div class="card" style="width: 30rem; height: auto;">
-          <div class="card-body">
+    <div class="col-md-5">
+        <div class="card" style="width: auto; height: auto;">
+          <div class="card-body" id="barChartBody">
             <canvas width="28rem" height="20rem" id="ageBarChart"></canvas>
           </div>
         </div>
     </div>
     <script>
-
+      {% if result['nop'] != 0 %}
         // Bar Chart
         let barChart = document.getElementById('ageBarChart')
         let data2 = {
           datasets: [{
-              data: [1, 2, 1, 1],
+              data: {{ result[1] }},
               backgroundColor: [
-                '#99c5e2',
-                '#6194cb',
-                '#227096',
-                '#12a8e1'
+                '#195ac7',
+                '#3d7cb6',
+                '#558ba5',
+                '#73b5c3',
+                '#8bd4cf',
+                '#b8fdf8'
               ],
               hoverBorderWidth: 3,
               hoverBorderColor: "#777"
           }],
           labels: [
+              'Less than 30',
               'Ages 30-40',
               'Ages 40-50',
               'Ages 50-60',
-              'Ages 60-70'
+              'Ages 60-70',
+              "Greater than 70"
           ]
         };
         let myBarChart = new Chart(barChart, {
@@ -120,6 +128,9 @@
         }
           }
       });
+      {% else %}
+        document.getElementById('barChartBody').innerHTML = "<h5>Add patients to access this chart.</h5>"
+      {% endif %}
       </script>
       
   </div>

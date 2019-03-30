@@ -1,7 +1,14 @@
 {% extends 'headers/temp.html' %}
 {% block body %}
+{% if result[0] == True %}
 <h1>Nurse registration successful</h1>
 <br>
-<h3>Nurse Id : <strong>{{ result[0] }}</strong></h3><br><br>
+<h3>Nurse Id : <strong>{{ result[1] }}</strong></h3><br><br>
 <a href="/"><button class="btn btn-outline-primary">Go to Login Screen</button></a>
+{% else %}
+<h1>Nurse registration failed</h1>
+<h3>Reason: {{ result[1] }}</h3>
+<br><br><br>
+<a href="/registerNewNurse"><button class="btn btn-outline-primary">Go to Registration Screen</button></a>
+{% endif %}
 {% endblock %}

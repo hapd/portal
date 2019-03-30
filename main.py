@@ -50,23 +50,23 @@ def authNurse():
     nurseId = result["nurseId"]
     password = result["nursePassword"]
     data = {
-        "id": nurseId,
+        "nurse_id": nurseId,
         "password": password
     }
-    r = sendDataToAPI(data, url, "/authenticateNurse")
-    if(r["fullfilmentText"] == "Access Granted"):
+    r = sendDataToAPI(data, "https://hapd.herokuapp.com", "/nurses/authenticate")
+    if(r["fullfilmentText"] == "True"):
         session["logged_in"] = nurseId
-        temp = {
-            "req_type": "read_nurse",
-            "data": {
-                "nurseId": nurseId
-            }
-        }
-        s = sendDataToAPI(temp, url, "/nurse")
-        if(s["fullfilmentText"] == "True"):
-            with open("static/data/logged_in_nurse.json", "w") as f:
-                json.dump(s["data"], f, indent=4)     
-        return redirect(url_for("home"))
+        
+        try:
+            s = requests.get("http://hapd.herokuapp.com/nurses/%s"%(nurseId))
+            print("Data from api:\n", s.text)
+            if(json.loads(s.text)["fullfilmentText"] == "True"):
+                with open("static/data/logged_in_nurse.json", "w") as f:
+                    json.dump(json.loads(s.text), f, indent=4) 
+            return redirect(url_for("home"))
+        except:
+            print("Couldn't send to webhook")
+            return redirect(url_for("launch", session = session))
     else:
         return redirect(url_for("launch", session = session))
 
@@ -102,33 +102,16 @@ def registerNewPatient():
         "stage": result["stage"],
         "address": result["address"],
         "bloodgroup": result["bloodgroup"],
-        "nurse": nurse["name"],
-        "contact": nurse["contact"],
-        "nurseId": nurse["nurseId"],
-        "pin": result["password"],
+        "nurse": nurse["data"]["data"]["name"],
+        "contact": nurse["data"]["data"]["contact"],
+        "nurse_id": nurse["data"]["data"]["_id"],
+        "password": result["password"],
         "image": encoded_string_image
     }
-    data_forStage = {
-        "req_type": "increment_nos",
-        "data": {
-            "nurseId": nurse["nurseId"],
-            "stage": result["stage"]
-        }
-    }
-    q = sendDataToAPI(data_forStage, url, "/nurse")
-    if(q["fullfilmentText"] == "False"):
-        error = ["Could not connect to the API"]
-        return render_template("registerNewUser.html", error = error)
-    r = sendDataToAPI(data, url, "/addUser")
-    if(r["fullfilmentText"] == "Account creation successful"):
+    
+    r = sendDataToAPI(data, "https://hapd.herokuapp.com", "/patients")
+    if(r["fullfilmentText"] == "True"):
         error.append(r["PID"])
-        data = {
-            "req_type": "increment_nop",
-            "data": {
-                "nurseId": nurse["nurseId"]
-            }
-        }
-        r = sendDataToAPI(data, url, '/nurse')
         return render_template("registerNewUser.html", error = error)
     else:
         error = ["API error"]
@@ -141,19 +124,29 @@ def registerNewNurse():
 @app.route('/registerNurse', methods=['POST'])
 def registerNurse():
     result = request.form
+    print(request.files)
+    if('file' not in request.files):
+        error = ["Bad Image error"]
+        return render_template("successNewNurse.html", result = [False, error])
+    else:
+        file = request.files['file']
+        if(file and allowed_file(file.filename)):
+            f = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], f))
+    image = cv2.imread("static/images/"+f)
+    retval, buffer = cv2.imencode('.jpg', image)
+    encoded = base64.b64encode(buffer)
+    encoded_string_image = str(encoded)[2:-1]
     data = {
         "name": result["name"],
         "email": result["email"],
         "contact": result["contact"],
-        "password": result["password"]
+        "password": result["password"],
+        "image": encoded_string_image
     }
-    d = {
-        "req_type": "add_nurse",
-        "data": data
-    }
-    r = sendDataToAPI(d, url, '/nurse')
+    r = sendDataToAPI(data, 'https://hapd.herokuapp.com', '/nurses')
     if(r["fullfilmentText"] == "True"):
-        return render_template("successNewNurse.html", result = [r["nurseId"]])
+        return render_template("successNewNurse.html", result = [True, r["nurse_id"]])
 
 
 @app.route("/logout")
@@ -164,20 +157,32 @@ def logout():
 @app.route("/home")
 def home():
     nurseId = session["logged_in"]
-    temp = {
-            "req_type": "read_nurse",
-            "data": {
-                "nurseId": nurseId
-            }
-    }
-    s = sendDataToAPI(temp, url, "/nurse")
-    if(s["fullfilmentText"] == "True"):
-        result = s["data"]
+    result = []
+    r = requests.get("https://hapd.herokuapp.com/nurses/"+nurseId)
+    if(json.loads(r.text)["fullfilmentText"] == "True"):
+        result.append(json.loads(r.text)['data']['data'])
+    r = requests.get("https://hapd.herokuapp.com/patients/nurse/"+nurseId)
+    patients = json.loads(r.text)['data']
+    dataset = [0,0,0,0,0,0]
+    for patient in patients:
+        if(patient['age']<30):
+            dataset[0] += 1
+        elif(patient['age']>=30 and patient['age']<40):
+            dataset[1] += 1
+        elif(patient['age']>=40 and patient['age']<50):
+            dataset[2] += 1
+        elif(patient['age']>=50 and patient['age']<60):
+            dataset[3] += 1
+        elif(patient['age']>=60 and patient['age']<70):
+            dataset[4] += 1
+        elif(patient['age']>=70):
+            dataset[5] += 1
+    result.append(dataset)
     return render_template('nurse_home.html', result = result, session = session)
 
-
-
-
+@app.route('/home/profile')
+def profile():
+    return render_template('nurse_profile.html')
 
 if(__name__ == "__main__"):
     app.run()

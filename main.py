@@ -129,16 +129,14 @@ def registerNurse():
         if(file and allowed_file(file.filename)):
             f = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], f))
-    image = cv2.imread("static/images/"+f)
-    retval, buffer = cv2.imencode('.jpg', image)
-    encoded = base64.b64encode(buffer)
-    encoded_string_image = str(encoded)[2:-1]
+    image = open("static/images/"+f, 'r+b')
+    encoded = base64.b64encode(image.read())
     data = {
         "name": result["name"],
         "email": result["email"],
         "contact": result["contact"],
         "password": result["password"],
-        "image": encoded_string_image
+        "image": encoded
     }
     r = sendDataToAPI(data, 'https://hapd.herokuapp.com', '/nurses')
     if(r["fullfilmentText"] == "True"):

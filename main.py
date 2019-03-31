@@ -14,10 +14,6 @@ import flask
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 
-# Import statements for data-analytics and opencv
-import cv2
-import numpy as np
-
 # Global values
 UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
@@ -82,10 +78,10 @@ def registerNewPatient():
         if(file and allowed_file(file.filename)):
             f = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], f))
-    image = cv2.imread("static/images/"+f)
-    retval, buffer = cv2.imencode('.jpg', image)
-    encoded = base64.b64encode(buffer)
-    encoded_string_image = str(encoded)[2:-1]
+    image = open("static/images/"+f, 'r+b')
+    encoded = base64.b64encode(image.read())
+    #encoded = base64.b64encode(buffer)
+    #encoded_string_image = str(encoded)[2:-1]
     result = request.form
     error = ["No error"]
     try:
@@ -106,7 +102,7 @@ def registerNewPatient():
         "contact": nurse["data"]["data"]["contact"],
         "nurse_id": nurse["data"]["data"]["_id"],
         "password": result["password"],
-        "image": encoded_string_image
+        "image": encoded
     }
     
     r = sendDataToAPI(data, "https://hapd.herokuapp.com", "/patients")
